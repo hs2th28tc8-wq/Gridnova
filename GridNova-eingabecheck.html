@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<title>GridNova – Sudoku</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#121e31;--panel2:#192941;--line:#30435e;--text:#edf4ff;--muted:#9aacc5;--accent:#62d6c5;--accent2:#8aa8ff;--bad:#ff7d89;--good:#8de0ae;--cell:#132238;--selected:#294c70;--peer:#1a3049;--same:#244766}
+:root.light{color-scheme:light;--bg:#f2f6fc;--panel:#fff;--panel2:#eaf0f8;--line:#cbd7e6;--text:#172338;--muted:#64748b;--accent:#087f75;--accent2:#315fce;--bad:#c6283d;--good:#16834b;--cell:#fff;--selected:#c9e3ff;--peer:#edf3fa;--same:#d9ebff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:radial-gradient(ellipse at top,#1b3150 0,var(--bg) 55%);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+:root.light body{background:linear-gradient(140deg,#e7f0ff,var(--bg) 55%)}
+button{font:inherit;color:inherit;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:11px 12px;cursor:pointer;transition:.15s}
+button:active{transform:scale(.98)}button:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
+button.primary{background:var(--accent);color:#06231f;border-color:var(--accent);font-weight:800}
+button.active{background:var(--accent2);color:white;border-color:var(--accent2)}
+button:disabled{opacity:.35;cursor:not-allowed}
+.app{max-width:620px;margin:auto;padding:22px 14px 36px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:11px}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#071827;font-size:24px;font-weight:900;box-shadow:0 8px 24px #0004}
+h1{font-size:22px;line-height:1;margin:0;letter-spacing:.5px}.tagline{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:5px}
+.header-actions{display:flex;gap:7px}.iconbtn{padding:9px 11px}
+.panel{background:color-mix(in srgb,var(--panel) 94%,transparent);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 16px 40px #0002}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:10px;text-align:center}.stat strong{display:block;font-size:18px}.stat span{font-size:11px;color:var(--muted)}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:13px}
+#grid{display:grid;grid-template-columns:repeat(9,1fr);width:100%;aspect-ratio:1;background:var(--line);border:2px solid var(--line);border-radius:8px;overflow:hidden;gap:1px;touch-action:manipulation}
+.cell{display:flex;align-items:center;justify-content:center;position:relative;background:var(--cell);font-size:clamp(17px,5.5vw,30px);font-weight:500;cursor:pointer;user-select:none;color:var(--accent2);min-width:0}
+.cell.given{color:var(--text);font-weight:800}.cell.peer{background:var(--peer)}.cell.same{background:var(--same)}.cell.selected{background:var(--selected);box-shadow:inset 0 0 0 2px var(--accent2)}.cell.error,.cell.wrong{background:color-mix(in srgb,var(--bad) 24%,var(--cell));color:var(--bad)}
+.cell:nth-child(3n):not(:nth-child(9n)){border-right:2px solid var(--line)}.cell:nth-child(n+19):nth-child(-n+27),.cell:nth-child(n+46):nth-child(-n+54){border-bottom:2px solid var(--line)}
+.cell.notes{display:grid;grid-template-columns:repeat(3,1fr);font-size:clamp(7px,1.8vw,11px);color:var(--muted);font-weight:400}.cell.notes span{display:grid;place-items:center}
+.numbers{display:grid;grid-template-columns:repeat(9,1fr);gap:6px;margin-top:12px}.numbers button{padding:12px 0;font-size:19px;font-weight:700}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:10px}.actions button{font-size:13px;padding:10px 5px}
+.message{min-height:26px;text-align:center;color:var(--accent);font-weight:700;padding-top:10px}
+.footer{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px;margin-top:12px}
+.screen{display:none}.screen.show{display:block}
+.welcome{text-align:center;padding:26px 10px}.welcome .biglogo{font-size:54px;margin-bottom:8px}.welcome h2{font-size:28px;margin:0 0 8px}.welcome p{color:var(--muted);line-height:1.5;margin:0 auto 20px;max-width:390px}
+.menu-buttons{display:grid;gap:9px;max-width:340px;margin:auto}.menu-buttons button{padding:14px}
+.subhead{font-size:13px;color:var(--muted);margin:0 0 10px}.best-list{display:grid;gap:8px}.best-row{display:flex;justify-content:space-between;background:var(--panel2);padding:10px 12px;border-radius:10px}
+.hidden{display:none!important}
+@media(min-width:560px){.app{padding-top:32px}.panel{padding:20px}.cell{font-size:30px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+ <div class="brand"><div class="logo">G</div><div><h1>GridNova</h1><div class="tagline">Find your focus</div></div></div>
+ <div class="header-actions"><button class="iconbtn" id="themeBtn" aria-label="Design wechseln">☼</button><button class="iconbtn" id="statsBtn" aria-label="Statistik">▤</button></div>
+</header>
+
+<section id="home" class="screen show panel welcome">
+ <div class="biglogo">▦</div><h2>Dein nächstes Rätsel wartet.</h2>
+ <p>Trainiere deinen Kopf, finde den Flow und knacke deine Bestzeit. Jeder Zug bringt dich näher zur Lösung.</p>
+ <div class="menu-buttons">
+  <button class="primary" id="playBtn">Neues Spiel starten</button>
+  <button id="homeStatsBtn">Meine Statistiken</button>
+ </div>
+</section>
+
+<section id="game" class="screen panel">
+ <div class="topline"><button id="homeBtn">← Menü</button><strong id="timer">00:00</strong><button id="newBtn">Neues Spiel ↻</button></div>
+ <div class="choices" id="levels">
+  <button data-level="Leicht">Leicht</button><button data-level="Mittel" class="active">Mittel</button><button data-level="Schwer">Schwer</button>
+ </div>
+ <div id="grid" aria-label="Sudoku Spielfeld"></div>
+ <div class="numbers" id="numbers"></div>
+ <div class="actions">
+  <button id="undoBtn">↶ Zurück</button><button id="notesBtn">✎ Notizen</button><button id="eraseBtn">⌫ Löschen</button><button id="hintBtn">✦ Tipp</button>
+ </div>
+ <div class="message" id="message" aria-live="polite"></div>
+ <div class="footer"><span id="progress">0 von 81 Feldern</span><span id="positionLabel">Kein Feld ausgewählt</span><span id="modeLabel">Notizen aus</span></div>
+</section>
+
+<section id="stats" class="screen panel">
+ <div class="topline"><button id="statsBack">← Menü</button><strong>Deine Statistik</strong><span></span></div>
+ <div class="stats">
+  <div class="stat"><strong id="played">0</strong><span>Gespielt</span></div>
+  <div class="stat"><strong id="wins">0</strong><span>Gelöst</span></div>
+  <div class="stat"><strong id="streak">0</strong><span>Serie</span></div>
+ </div>
+ <p class="subhead">Deine Bestzeiten</p><div class="best-list" id="bestList"></div>
+ <p class="subhead" style="margin-top:18px">Die Daten werden auf diesem Gerät gespeichert.</p>
+</section>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const STORE='gridnova-data-v1';
+let level='Mittel',solution=[],board=[],fixed=[],selected=-1,notes=[],history=[],noteMode=false,finished=false,startAt=0,tick=null,seconds=0;
+let data=JSON.parse(localStorage.getItem(STORE)||'null')||{played:0,wins:0,streak:0,best:{}};
+const removals={Leicht:38,Mittel:46,Schwer:53};
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){let j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+function candidates(g,i){let r=i/9|0,c=i%9,used=new Set();for(let k=0;k<9;k++){used.add(g[r*9+k]);used.add(g[k*9+c])}let br=r-r%3,bc=c-c%3;for(let y=0;y<3;y++)for(let x=0;x<3;x++)used.add(g[(br+y)*9+bc+x]);return Array.from({length:9},(_,i)=>i+1).filter(n=>!used.has(n))}
+function countSolutions(g,limit=2){let best=-1,opts=null;for(let i=0;i<81;i++)if(!g[i]){let c=candidates(g,i);if(!c.length)return 0;if(!opts||c.length<opts.length){best=i;opts=c;if(c.length===1)break}}if(best<0)return 1;let total=0;for(let n of opts){g[best]=n;total+=countSolutions(g,limit-total);if(total>=limit){g[best]=0;return total}}g[best]=0;return total}
+function makePuzzle(){let s=Array(81).fill(0);function fill(){let best=-1,opts=null;for(let i=0;i<81;i++)if(!s[i]){let c=candidates(s,i);if(!opts||c.length<opts.length){best=i;opts=c}}if(best<0)return true;for(let n of shuffle(opts)){s[best]=n;if(fill())return true}s[best]=0;return false}fill();let p=s.slice(),removed=0;for(let i of shuffle([...Array(81).keys()])){if(removed>=removals[level])break;let old=p[i];p[i]=0;if(countSolutions(p.slice(),2)===1)removed++;else p[i]=old}return[s,p]}
+function fmt(t){return String(t/60|0).padStart(2,'0')+':'+String(t%60).padStart(2,'0')}
+function save(){localStorage.setItem(STORE,JSON.stringify(data))}
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('show'));$('#'+id).classList.add('show')}
+function startGame(){clearInterval(tick);[solution,board]=makePuzzle();fixed=board.map(Boolean);notes=Array.from({length:81},()=>new Set());history=[];selected=-1;finished=false;noteMode=false;seconds=0;$('#timer').textContent='00:00';$('#message').textContent='';$('#notesBtn').classList.remove('active');$('#modeLabel').textContent='Notizen aus';$('#levels').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.level===level));draw();startAt=Date.now();tick=setInterval(()=>{seconds=Math.floor((Date.now()-startAt)/1000);$('#timer').textContent=fmt(seconds)},1000);show('game')}
+function snapshot(){history.push({board:board.slice(),notes:notes.map(s=>new Set(s))});if(history.length>150)history.shift()}
+function conflicts(i){let v=board[i];if(!v)return false;let r=i/9|0,c=i%9;for(let k=0;k<9;k++){if(k!==c&&board[r*9+k]===v)return true;if(k!==r&&board[k*9+c]===v)return true}let br=r-r%3,bc=c-c%3;for(let y=0;y<3;y++)for(let x=0;x<3;x++){let j=(br+y)*9+bc+x;if(j!==i&&board[j]===v)return true}return false}
+function draw(){let grid=$('#grid');grid.innerHTML='';let val=selected>=0?board[selected]:0;for(let i=0;i<81;i++){let d=document.createElement('div');d.className='cell';if(board[i])d.textContent=board[i];else if(notes[i].size){d.classList.add('notes');for(let n=1;n<=9;n++){let s=document.createElement('span');s.textContent=notes[i].has(n)?n:'';d.append(s)}}if(fixed[i])d.classList.add('given');if(selected>=0){let r=i/9|0,c=i%9,sr=selected/9|0,sc=selected%9;if(i===selected)d.classList.add('selected');else if(val&&board[i]===val)d.classList.add('same');else if(r===sr||c===sc||(r/3|0)===(sr/3|0)&&(c/3|0)===(sc/3|0))d.classList.add('peer')}if(conflicts(i))d.classList.add('error');else if(board[i]&&!fixed[i]&&board[i]!==solution[i])d.classList.add('wrong');d.setAttribute('aria-label','Reihe '+(Math.floor(i/9)+1)+', Spalte '+(i%9+1)+(board[i]?', Zahl '+board[i]:', leer'));d.onclick=()=>{selected=i;draw();$('#message').textContent='Ausgewählt: Reihe '+(Math.floor(i/9)+1)+', Spalte '+(i%9+1)+'.'};grid.append(d)}let count=board.filter(Boolean).length;$('#progress').textContent=count+' von 81 Feldern';$('#positionLabel').textContent=selected<0?'Kein Feld ausgewählt':'Reihe '+(Math.floor(selected/9)+1)+' · Spalte '+(selected%9+1);$('#numbers').querySelectorAll('button').forEach(b=>b.disabled=false)}
+function canPlace(n,i){if(!n)return true;let r=i/9|0,c=i%9,br=r-r%3,bc=c-c%3;for(let k=0;k<9;k++){if(k!==c&&board[r*9+k]===n)return false;if(k!==r&&board[k*9+c]===n)return false}for(let y=0;y<3;y++)for(let x=0;x<3;x++){let j=(br+y)*9+bc+x;if(j!==i&&board[j]===n)return false}return true}
+function enter(n){if(selected<0||fixed[selected]||finished)return;if(noteMode&&n){if(board[selected])return;snapshot();notes[selected].has(n)?notes[selected].delete(n):notes[selected].add(n);draw();return}snapshot();board[selected]=n;notes[selected].clear();if(n){let r=selected/9|0,c=selected%9,br=r-r%3,bc=c-c%3;for(let i=0;i<81;i++){let rr=i/9|0,cc=i%9;if(rr===r||cc===c||(rr>=br&&rr<br+3&&cc>=bc&&cc<bc+3))notes[i].delete(n)}}draw();if(n&&conflicts(selected))$('#message').textContent='Doppelte Zahl: Prüfe Reihe, Spalte und 3×3-Block.';else if(n&&n!==solution[selected])$('#message').textContent='Die Zahl ist hier nicht die Lösung. Prüfe das ausgewählte Feld.';else if(n)$('#message').textContent='Richtig für Reihe '+(Math.floor(selected/9)+1)+', Spalte '+(selected%9+1)+'.';else $('#message').textContent='Feld gelöscht.';checkWin()}
+function checkWin(){if(board.every(Boolean)&&board.every((v,i)=>v===solution[i])){finished=true;clearInterval(tick);seconds=Math.floor((Date.now()-startAt)/1000);$('#timer').textContent=fmt(seconds);$('#message').textContent='Geschafft! Deine Zeit: '+fmt(seconds)+' ✨';data.wins++;data.streak++;data.best[level]=!data.best[level]?seconds:Math.min(data.best[level],seconds);save()}else if(board.every(Boolean))$('#message').textContent='Alle Felder sind gefüllt, aber mindestens eine Zahl stimmt noch nicht. Rote Felder prüfen.';}
+function renderStats(){let played=data.played||0,wins=data.wins||0;$('#played').textContent=played;$('#wins').textContent=wins;$('#streak').textContent=data.streak||0;let list=$('#bestList');list.innerHTML='';for(let l of ['Leicht','Mittel','Schwer']){let row=document.createElement('div');row.className='best-row';let a=document.createElement('span');a.textContent=l;let b=document.createElement('strong');b.textContent=data.best[l]===undefined?'Noch keine Zeit':fmt(data.best[l]);row.append(a,b);list.append(row)}}
+for(let n=1;n<=9;n++){let b=document.createElement('button');b.textContent=n;b.dataset.n=n;b.onclick=()=>enter(n);$('#numbers').append(b)}
+$('#playBtn').onclick=()=>{data.played++;save();startGame()};$('#newBtn').onclick=()=>{data.played++;save();startGame()};$('#homeBtn').onclick=()=>{clearInterval(tick);show('home')};$('#homeStatsBtn').onclick=$('#statsBtn').onclick=()=>{renderStats();show('stats')};$('#statsBack').onclick=()=>show('home');
+$('#levels').querySelectorAll('button').forEach(b=>b.onclick=()=>{level=b.dataset.level;startGame()});
+$('#eraseBtn').onclick=()=>enter(0);$('#notesBtn').onclick=()=>{noteMode=!noteMode;$('#notesBtn').classList.toggle('active',noteMode);$('#modeLabel').textContent=noteMode?'Notizen an':'Notizen aus'};
+$('#undoBtn').onclick=()=>{if(finished||!history.length)return;let h=history.pop();board=h.board;notes=h.notes;draw();$('#message').textContent='Letzter Zug zurückgenommen.'};
+$('#hintBtn').onclick=()=>{if(finished)return;if(selected<0||fixed[selected]){selected=board.findIndex((v,i)=>!v&&!fixed[i]);if(selected<0)return}snapshot();board[selected]=solution[selected];notes[selected].clear();draw();checkWin();if(!finished)$('#message').textContent='Ein Feld wurde aufgedeckt.'};
+$('#themeBtn').onclick=()=>{document.documentElement.classList.toggle('light');localStorage.setItem('gridnova-theme',document.documentElement.classList.contains('light')?'light':'dark')};
+if(localStorage.getItem('gridnova-theme')==='light')document.documentElement.classList.add('light');
+document.addEventListener('keydown',e=>{if(!$('#game').classList.contains('show'))return;if(e.key>='1'&&e.key<='9')enter(+e.key);else if(['Backspace','Delete','0'].includes(e.key))enter(0);else if(selected>=0&&e.key.startsWith('Arrow')){let delta={ArrowLeft:-1,ArrowRight:1,ArrowUp:-9,ArrowDown:9}[e.key],next=selected+delta;if(next>=0&&next<81&&!(Math.abs(delta)===1&&(next/9|0)!==(selected/9|0))){selected=next;draw()}}});
+</script>
+</body>
+</html>
